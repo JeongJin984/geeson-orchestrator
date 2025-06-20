@@ -2,15 +2,10 @@ dependencies {
     // Spring Boot Web
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // Kafka core
-    implementation 'org.springframework.kafka:spring-kafka'
+    implementation project(path: ":common-saga")
 
-    // JSON 직렬화/역직렬화 (Kafka message payload 처리)
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation project(path: ":infra:rdb:saga-db")
 
-    // JPA and Database
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation project(path: ":support:uuid")
+    implementation project(path: ":infra:uuid-impl")
 }

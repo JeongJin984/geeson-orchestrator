@@ -10,7 +10,17 @@ pluginManagement {
 rootProject.name = 'geeson-orchestrator'
 
 include(
-    'order-saga'
+    'common-saga',
+
+    'order-saga',
+
+    'infra',
+    'infra:rdb',
+    'infra:rdb:saga-db',
+    'infra:uuid-impl',
+
+    'support',
+    'support:uuid'
 )
 
 
