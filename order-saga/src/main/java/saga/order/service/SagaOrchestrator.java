@@ -19,13 +19,15 @@ public class SagaOrchestrator {
     public String startSaga(OrderCreated request) {
         try {
             SagaInstanceEntity sagaInstance = commandGateway.createSagaInstance(
-                    "OrderSaga", request);
+                    "OrderSaga", request
+            );
 
             PaymentRequestEvent paymentRequest = new PaymentRequestEvent(
                     request.paymentMethodId(),
                     request.transactionId(),
                     request.totalPrice(),
-                    request.currency());
+                    request.currency()
+            );
 
             SagaStepEntity sagaStep = commandGateway.createSagaStep(
                     sagaInstance,
@@ -33,13 +35,15 @@ public class SagaOrchestrator {
                     SagaStepEntity.StepType.FORWARD,
                     1,
                     paymentRequest,
-                    null);
+                    null
+            );
 
             commandGateway.executeSagaStep(
                     sagaStep,
                     "payment",
                     String.valueOf(request.paymentMethodId()),
-                    "requests");
+                    "requests"
+            );
 
             return sagaInstance.getId();
         } catch (JsonProcessingException e) {
