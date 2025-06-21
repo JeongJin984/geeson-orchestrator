@@ -101,11 +101,11 @@ public class OrderSagaOrchestrator {
             1,
             new Command<>(
                 new OrderCompletePayload(
-                    orderCompletePayload.getOrderId(),
+                    orderCompletePayload.orderId(),
                     true
                 )
             ),
-            orderCompletePayload.getOrderId(),
+            orderCompletePayload.orderId(),
             "order",
             null
         );
@@ -113,7 +113,7 @@ public class OrderSagaOrchestrator {
         commandGateway.executeSagaStep(
             sagaStep,
             "order",
-            orderCompletePayload.getOrderId(),
+            orderCompletePayload.orderId(),
             "complete"
         );
     }
