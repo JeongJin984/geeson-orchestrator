@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import saga.common.command.BaseCommand;
+import saga.common.command.Command;
 import saga.common.storage.entity.SagaInstanceEntity;
 import saga.common.storage.entity.SagaStepEntity;
 import saga.common.storage.repository.SagaInstanceRepository;
@@ -56,34 +58,48 @@ public class CommandGateway {
      * @param stepType The type of step (FORWARD or COMPENSATION)
      * @param executionOrder The order in which the step should be executed
      * @param command The command to be executed
-     * @param compensatesStepId The ID of the step that this step compensates (for compensation steps)
+     * @param orgStep Original step that this step compensates (for compensation steps)
      * @return The created saga step
      */
     @Transactional
-    public SagaStepEntity createSagaStep(
-            SagaInstanceEntity sagaInstance,
-            String stepName,
-            SagaStepEntity.StepType stepType,
-            int executionOrder,
-            Object command,
-            String compensatesStepId) throws JsonProcessingException {
+    public <T> SagaStepEntity createSagaStep(
+        SagaInstanceEntity sagaInstance,
+        String stepName,
+        SagaStepEntity.StepType stepType,
+        int executionOrder,
+        Command<T> command,
+        String aggregateId,
+        String aggregateType,
+        SagaStepEntity orgStep
+    ) throws JsonProcessingException {
+        String stepId = String.valueOf(uuidGenerator.nextId());
+
+        command.setBaseCommand(
+            new BaseCommand(
+                String.valueOf(uuidGenerator.nextId()),
+                sagaInstance.getId(),
+                stepId,
+                aggregateId,
+                "orchestrator"
+            )
+        );
 
         String commandJson = objectMapper.writeValueAsString(command);
 
         SagaStepEntity sagaStep = SagaStepEntity.builder()
-                .id(String.valueOf(uuidGenerator.nextId()))
-                .sagaInstance(sagaInstance)
-                .stepName(stepName)
-                .stepType(stepType)
-                .status(SagaStepEntity.StepStatus.PENDING)
-                .executionOrder(executionOrder)
-                .command(commandJson)
-                .build();
+            .id(stepId)
+            .sagaInstance(sagaInstance)
+            .stepName(stepName)
+            .stepType(stepType)
+            .status(SagaStepEntity.StepStatus.PENDING)
+            .executionOrder(executionOrder)
+            .aggregateId(aggregateId)
+            .aggregateType(aggregateType)
+            .command(commandJson)
+            .build();
 
-        if (compensatesStepId != null && stepType == SagaStepEntity.StepType.COMPENSATION) {
-            SagaInstanceEntity compensatesStep = new SagaInstanceEntity();
-            compensatesStep.setId(compensatesStepId);
-            sagaStep.setCompensatesStep(compensatesStep);
+        if (orgStep != null && stepType == SagaStepEntity.StepType.COMPENSATION) {
+            sagaStep.setCompensatesStep(orgStep);
         }
 
         return sagaStepRepository.save(sagaStep);
@@ -103,7 +119,8 @@ public class CommandGateway {
             SagaStepEntity sagaStep,
             String aggregateType,
             String aggregateId,
-            String eventType) throws JsonProcessingException {
+            String eventType
+    ) throws JsonProcessingException {
 
         // Update step status to IN_PROGRESS
         sagaStep.setStatus(SagaStepEntity.StepStatus.IN_PROGRESS);
@@ -114,6 +131,7 @@ public class CommandGateway {
         eventPublisher.publishEvent(
                 aggregateType,
                 aggregateId,
+                "command",
                 eventType,
                 sagaStep.getCommand()
         );
@@ -159,7 +177,7 @@ public class CommandGateway {
      */
     @Transactional
     public void updateSagaInstanceStatus(String sagaInstanceId) {
-        SagaInstanceEntity sagaInstance = sagaInstanceRepository.findById(sagaInstanceId)
+        SagaInstanceEntity sagaInstance = sagaInstanceRepository.findByIdWithOrderedSteps(sagaInstanceId)
                 .orElseThrow(() -> new IllegalArgumentException("Saga instance not found: " + sagaInstanceId));
 
         // Get all steps for this saga instance

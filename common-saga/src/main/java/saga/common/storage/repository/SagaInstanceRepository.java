@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface SagaInstanceRepository {
     SagaInstanceEntity save(SagaInstanceEntity sagaInstanceEntity);
-    Optional<SagaInstanceEntity> findById(String sagaId);
+    Optional<SagaInstanceEntity> findByIdWithOrderedSteps(String sagaId);
 }

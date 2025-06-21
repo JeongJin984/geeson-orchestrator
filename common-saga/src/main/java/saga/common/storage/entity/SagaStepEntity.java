@@ -27,6 +27,9 @@ public class SagaStepEntity {
 
     private String stepName;
 
+    private String aggregateId;
+    private String aggregateType;
+
     @Enumerated(EnumType.STRING)
     private StepType stepType; // FORWARD, COMPENSATION
 
@@ -43,7 +46,7 @@ public class SagaStepEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "compensates_step_id")
-    private SagaInstanceEntity compensatesStep;
+    private SagaStepEntity compensatesStep;
 
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;

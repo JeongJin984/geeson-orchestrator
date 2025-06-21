@@ -19,7 +19,7 @@ public class SagaInstanceJpaRepository implements SagaInstanceRepository {
     }
 
     @Override
-    public Optional<SagaInstanceEntity> findById(String sagaId) {
-        return springDataSagaInstanceJpaRepository.findById(sagaId);
+    public Optional<SagaInstanceEntity> findByIdWithOrderedSteps(String sagaId) {
+        return springDataSagaInstanceJpaRepository.findByIdWithOrderedSteps(sagaId);
     }
 }

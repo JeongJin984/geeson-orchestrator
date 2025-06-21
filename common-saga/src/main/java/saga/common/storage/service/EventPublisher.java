@@ -71,13 +71,15 @@ public class EventPublisher {
     public OutboxEventEntity publishEvent(
             String aggregateType,
             String aggregateId,
+            String intentType,
             String eventType,
-            Object payload) throws JsonProcessingException {
+            Object payload
+    ) throws JsonProcessingException {
 
         OutboxEventEntity event = createEvent(aggregateType, aggregateId, eventType, payload);
 
         // Publish to Kafka
-        String topic = aggregateType.toLowerCase() + "-" + eventType.toLowerCase();
+        String topic = aggregateType.toLowerCase() + "." + aggregateType.toLowerCase() + "." + intentType ;
         kafkaTemplate.send(topic, aggregateId, event.getPayload());
 
         // Update event status

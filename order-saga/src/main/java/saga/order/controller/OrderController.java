@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import saga.order.event.OrderCreated;
-import saga.order.service.SagaOrchestrator;
+import saga.order.service.OrderSagaOrchestrator;
 
 import java.util.Map;
 
@@ -14,9 +14,9 @@ import java.util.Map;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    private final SagaOrchestrator orchestrator;
+    private final OrderSagaOrchestrator orchestrator;
 
-    public OrderController(SagaOrchestrator orchestrator) {
+    public OrderController(OrderSagaOrchestrator orchestrator) {
         this.orchestrator = orchestrator;
     }
 

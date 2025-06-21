@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "saga_instance", schema = "saga_db")
@@ -38,6 +40,9 @@ public class SagaInstanceEntity {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "sagaInstance")
+    private List<SagaStepEntity> sagaSteps = new ArrayList<>();
 
     public enum SagaStatus {
         PENDING,        // Saga 시작 대기
