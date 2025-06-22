@@ -20,7 +20,8 @@ include(
     'infra:uuid-impl',
 
     'support',
-    'support:uuid'
+    'support:uuid',
+    'support:enums'
 )
 
 

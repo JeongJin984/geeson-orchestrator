@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import saga.common.storage.entity.OutboxEventEntity;
 import saga.common.storage.repository.OutboxEventRepository;
+import support.enums.KafkaTopics;
 import support.uuid.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -79,7 +80,7 @@ public class EventPublisher {
         OutboxEventEntity event = createEvent(aggregateType, aggregateId, eventType, payload);
 
         // Publish to Kafka
-        String topic = aggregateType.toLowerCase() + "." + aggregateType.toLowerCase() + "." + intentType ;
+        String topic = KafkaTopics.getKafkaTopic(aggregateType, eventType, intentType).getTopicName();
         kafkaTemplate.send(topic, aggregateId, event.getPayload());
 
         // Update event status

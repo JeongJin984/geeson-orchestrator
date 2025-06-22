@@ -11,4 +11,5 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     implementation project(path: ":support:uuid")
+    implementation project(path: ":support:enums")
 }
