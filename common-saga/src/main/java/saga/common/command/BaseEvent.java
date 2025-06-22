@@ -1,5 +1,6 @@
-package saga.order.event;
+package saga.common.command;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import support.uuid.UuidGenerator;
 
@@ -8,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public abstract class BaseEvent {
+@AllArgsConstructor
+public class BaseEvent {
         private final String eventId;
         private final String eventType;
         private final String aggregateId;
@@ -20,8 +22,8 @@ public abstract class BaseEvent {
         private final String message;
         private final Map<String, String> metadata;
 
-        public BaseEvent(UuidGenerator uuidGenerator, String aggregateId, String aggregateType, String source, String message) {
-            this.eventId = String.valueOf(uuidGenerator.nextId());
+        public BaseEvent(String eventId, String aggregateId, String aggregateType, String source, String message) {
+            this.eventId = eventId;
             this.aggregateId = aggregateId;
             this.aggregateType = aggregateType;
             this.occurredAt = LocalDateTime.now().toString();

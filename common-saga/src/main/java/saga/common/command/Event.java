@@ -6,13 +6,13 @@ import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
-public class Command<T> {
+public class Event<T> {
     private final T payload;
     @Setter
-    private BaseCommand baseCommand;
+    private BaseEvent baseEvent;
 
-    public Command(T payload) {
+    public Event(T payload) {
         this.payload = payload;
-        this.baseCommand = null;
+        this.baseEvent = null;
     }
 }

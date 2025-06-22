@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record OrderCreated (
-    Long orderId,
-    Long customerId,
-    Long paymentMethodId,
+    String orderId,
+    String customerId,
+    String paymentMethodId,
     String transactionId,
     BigDecimal totalPrice,
     String currency,

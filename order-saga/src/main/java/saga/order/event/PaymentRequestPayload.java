@@ -5,7 +5,9 @@ import lombok.Builder;
 import java.math.BigDecimal;
 
 public record PaymentRequestPayload (
-    Long paymentMethodId,
+    String customerId,
+    String orderId,
+    String paymentMethodId,
     String transactionId,
     BigDecimal totalPrice,
     String currency

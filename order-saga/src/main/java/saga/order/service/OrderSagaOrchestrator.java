@@ -6,6 +6,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import saga.common.command.Command;
+import saga.common.command.Event;
 import saga.common.storage.entity.SagaInstanceEntity;
 import saga.common.storage.entity.SagaStepEntity;
 import saga.common.storage.repository.SagaInstanceRepository;
@@ -38,26 +39,30 @@ public class OrderSagaOrchestrator {
         }
     }
 
-    @KafkaListener(topics = "order-saga.payment.event", groupId = "order-saga")
-    public void handlePaymentResult(PaymentResultEvent event) {
+    @KafkaListener(topics = "payment.complete.event", groupId = "order-saga")
+    public void handlePaymentCompleteEvent(Event<PaymentCompleteEvent> event) {
         try {
-            if(event.isSuccess()) {
-                SagaInstanceEntity sagaInstance = sagaInstanceRepository.findByIdWithOrderedSteps(event.getSagaId())
-                    .orElseThrow(() -> new IllegalArgumentException("Saga instance not found: " + event.getSagaId()));
+            SagaInstanceEntity sagaInstance = sagaInstanceRepository.findByIdWithOrderedSteps(event.getBaseEvent().getSagaId())
+                .orElseThrow(() -> new IllegalArgumentException("Saga instance not found: " + event.getBaseEvent().getSagaId()));
 
-                commandGateway.handleStepResponse(event.getStepId(), event, event.isSuccess());
-                orderCompleteStep(
-                    new OrderCompletePayload(
-                        event.getOrderId(),
-                        true
-                    ),
-                    sagaInstance
-                );
-            } else {
-                // mark the original payment step as failed
-                commandGateway.handleStepResponse(event.getStepId(), event, !event.isSuccess());
-                orderSagaCompensate.compensate(event.getSagaId(), event.getEventId(), event.getMessage());
-            }
+            commandGateway.handleStepResponse(event.getBaseEvent().getStepId(), event, true);
+            orderCompleteStep(
+                new OrderCompletePayload(
+                    event.getPayload().orderId(),
+                    true
+                ),
+                sagaInstance
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @KafkaListener(topics = "payment.reject.event", groupId = "order-saga")
+    public void handlePaymentRejectEvent(Event<PaymentRejectEvent> event) {
+        try {
+            commandGateway.handleStepResponse(event.getBaseEvent().getStepId(), event, false);
+            orderSagaCompensate.compensate(event.getBaseEvent().getSagaId(), event.getBaseEvent().getSagaId(), event.getBaseEvent().getEventId(), event.getBaseEvent().getMessage());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -74,6 +79,8 @@ public class OrderSagaOrchestrator {
             1,
             new Command<>(
                 new PaymentRequestPayload(
+                    request.customerId(),
+                    request.orderId(),
                     request.paymentMethodId(),
                     request.transactionId(),
                     request.totalPrice(),

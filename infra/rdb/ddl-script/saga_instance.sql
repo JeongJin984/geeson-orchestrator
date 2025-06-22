@@ -13,6 +13,8 @@ CREATE TABLE saga_step (
                            step_name VARCHAR(100) NOT NULL,
                            step_type ENUM('FORWARD', 'COMPENSATION') NOT NULL DEFAULT 'FORWARD',
                            status ENUM('PENDING', 'IN_PROGRESS', 'DONE', 'FAILED', 'COMPENSATED') NOT NULL,
+                           aggregate_id varchar(255) NOT NULL,
+                           aggregate_type varchar(100) NOT NULL,
                            execution_order INT NOT NULL,
                            command JSON,
                            event_response JSON,

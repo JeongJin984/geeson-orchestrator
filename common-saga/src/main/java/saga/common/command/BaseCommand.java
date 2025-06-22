@@ -1,5 +1,6 @@
 package saga.common.command;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import support.uuid.UuidGenerator;
 
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
+@AllArgsConstructor
 public class BaseCommand {
     private final String commandId;
     private final String sagaId;
