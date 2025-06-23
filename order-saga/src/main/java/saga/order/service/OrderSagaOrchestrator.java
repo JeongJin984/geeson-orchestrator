@@ -1,7 +1,10 @@
 package saga.order.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +13,6 @@ import saga.common.command.Event;
 import saga.common.storage.entity.SagaInstanceEntity;
 import saga.common.storage.entity.SagaStepEntity;
 import saga.common.storage.repository.SagaInstanceRepository;
-import saga.common.storage.repository.SagaStepRepository;
 import saga.common.storage.service.CommandGateway;
 import saga.order.event.*;
 import support.uuid.UuidGenerator;
@@ -20,18 +22,21 @@ import support.uuid.UuidGenerator;
 @Transactional
 public class OrderSagaOrchestrator {
     private final CommandGateway commandGateway;
-    private final SagaStepRepository sagaStepRepository;
     private final UuidGenerator uuidGenerator;
     private final OrderSagaCompensate orderSagaCompensate;
     private final SagaInstanceRepository sagaInstanceRepository;
+    private final ObjectMapper objectMapper;
 
-    public String startSaga(OrderCreated request) {
+    @KafkaListener(topics = "order-request-command", groupId = "order-saga")
+    public String startSaga(String request) {
         try {
+             OrderCreated order = objectMapper.readValue(request, OrderCreated.class);
+
             SagaInstanceEntity sagaInstance = commandGateway.createSagaInstance(
                     "OrderSaga", request
             );
 
-            startOrderSaga(request, sagaInstance);
+            startOrderSaga(order, sagaInstance);
 
             return sagaInstance.getId();
         } catch (JsonProcessingException e) {
@@ -39,9 +44,10 @@ public class OrderSagaOrchestrator {
         }
     }
 
-    @KafkaListener(topics = "payment.complete.event", groupId = "order-saga")
-    public void handlePaymentCompleteEvent(Event<PaymentCompleteEvent> event) {
+    @KafkaListener(topics = "payment-complete-event", groupId = "order-saga")
+    public void handlePaymentCompleteEvent(ConsumerRecord<String, String> eventRecord) {
         try {
+            Event<PaymentCompleteEvent> event = objectMapper.readValue(eventRecord.value(),  new TypeReference<>() {});
             SagaInstanceEntity sagaInstance = sagaInstanceRepository.findByIdWithOrderedSteps(event.getBaseEvent().getSagaId())
                 .orElseThrow(() -> new IllegalArgumentException("Saga instance not found: " + event.getBaseEvent().getSagaId()));
 
@@ -58,9 +64,10 @@ public class OrderSagaOrchestrator {
         }
     }
 
-    @KafkaListener(topics = "payment.reject.event", groupId = "order-saga")
-    public void handlePaymentRejectEvent(Event<PaymentRejectEvent> event) {
+    @KafkaListener(topics = "payment-reject-event", groupId = "order-saga")
+    public void handlePaymentRejectEvent(String rawEvent) {
         try {
+            Event<PaymentRejectEvent> event = objectMapper.readValue(rawEvent,  new TypeReference<>() {});
             commandGateway.handleStepResponse(event.getBaseEvent().getStepId(), event, false);
             orderSagaCompensate.compensate(event.getBaseEvent().getSagaId(), event.getBaseEvent().getSagaId(), event.getBaseEvent().getEventId(), event.getBaseEvent().getMessage());
         } catch (JsonProcessingException e) {
@@ -70,7 +77,6 @@ public class OrderSagaOrchestrator {
 
     private void startOrderSaga(OrderCreated request, SagaInstanceEntity sagaInstance) throws JsonProcessingException {
         String paymentAggregateId = String.valueOf(uuidGenerator.nextId());
-        String stepId = String.valueOf(uuidGenerator.nextId());
 
         SagaStepEntity sagaStep = commandGateway.createSagaStep(
             sagaInstance,
@@ -96,7 +102,7 @@ public class OrderSagaOrchestrator {
             sagaStep,
             "payment",
             paymentAggregateId,
-            "requests"
+            "request"
         );
     }
 

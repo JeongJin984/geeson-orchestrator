@@ -16,9 +16,7 @@ import support.uuid.UuidGenerator;
 @RequiredArgsConstructor
 public class OrderSagaCompensate {
     private final SagaInstanceRepository sagaInstanceRepository;
-    private final SagaStepRepository sagaStepRepository;
     private final CommandGateway commandGateway;
-    private final UuidGenerator uuidGenerator;
 
     public void compensate(final String sagaId, final String triggerEventId, final String reason) throws JsonProcessingException {
         SagaInstanceEntity sagaInstance = sagaInstanceRepository.findByIdWithOrderedSteps(sagaId)

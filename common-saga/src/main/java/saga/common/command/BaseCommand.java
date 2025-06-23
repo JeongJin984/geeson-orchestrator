@@ -2,6 +2,7 @@ package saga.common.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import support.uuid.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -10,14 +11,15 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class BaseCommand {
-    private final String commandId;
-    private final String sagaId;
-    private final String stepId;
-    private final String aggregateId;
-    private final String timestamp;
-    private final String source;
-    private final Map<String, String> metadata;
+    private String commandId;
+    private String sagaId;
+    private String stepId;
+    private String aggregateId;
+    private String timestamp;
+    private String source;
+    private Map<String, String> metadata;
 
     public BaseCommand(String commandId, String sagaId, String stepId, String aggregateId, String source) {
         this.commandId = commandId;

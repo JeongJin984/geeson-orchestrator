@@ -2,6 +2,7 @@ package saga.common.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import support.uuid.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -10,17 +11,18 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class BaseEvent {
-        private final String eventId;
-        private final String eventType;
-        private final String aggregateId;
-        private final String aggregateType;
-        private final String occurredAt;
-        private final String source;
-        private final String sagaId;
-        private final String stepId;
-        private final String message;
-        private final Map<String, String> metadata;
+        private String eventId;
+        private String eventType;
+        private String aggregateId;
+        private String aggregateType;
+        private String occurredAt;
+        private String source;
+        private String sagaId;
+        private String stepId;
+        private String message;
+        private Map<String, String> metadata;
 
         public BaseEvent(String eventId, String aggregateId, String aggregateType, String source, String message) {
             this.eventId = eventId;

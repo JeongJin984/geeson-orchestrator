@@ -1,10 +1,10 @@
-package storage.rdb.saga;
+package storage.rdb.saga.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import saga.common.storage.entity.SagaStepEntity;
 import saga.common.storage.repository.SagaStepRepository;
-import storage.rdb.saga.adapter.SpringDataSagaStepJpaRepository;
+import storage.rdb.saga.repository.adapter.SpringDataSagaStepJpaRepository;
 
 import java.util.List;
 import java.util.Optional;

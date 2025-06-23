@@ -1,10 +1,10 @@
-package storage.rdb.saga;
+package storage.rdb.saga.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import saga.common.storage.entity.SagaInstanceEntity;
 import saga.common.storage.repository.SagaInstanceRepository;
-import storage.rdb.saga.adapter.SpringDataSagaInstanceJpaRepository;
+import storage.rdb.saga.repository.adapter.SpringDataSagaInstanceJpaRepository;
 
 import java.util.Optional;
 
@@ -20,6 +20,7 @@ public class SagaInstanceJpaRepository implements SagaInstanceRepository {
 
     @Override
     public Optional<SagaInstanceEntity> findByIdWithOrderedSteps(String sagaId) {
-        return springDataSagaInstanceJpaRepository.findByIdWithOrderedSteps(sagaId);
+        Optional<SagaInstanceEntity> byIdWithOrderedSteps = springDataSagaInstanceJpaRepository.findByIdWithOrderedSteps(sagaId);
+        return byIdWithOrderedSteps;
     }
 }

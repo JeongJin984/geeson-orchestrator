@@ -1,10 +1,10 @@
-package storage.rdb.saga;
+package storage.rdb.saga.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import saga.common.storage.entity.OutboxEventEntity;
 import saga.common.storage.repository.OutboxEventRepository;
-import storage.rdb.saga.adapter.SpringDataOutboxEventEntityJpaRepository;
+import storage.rdb.saga.repository.adapter.SpringDataOutboxEventEntityJpaRepository;
 
 import java.util.List;
 import java.util.Optional;
